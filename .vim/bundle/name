@@ -1,0 +1,90 @@
+
+filetype off
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'scrooloose/nerdtree'
+Plugin 'kien/ctrlp.vim'
+Plugin 'mattn/emmet-vim'
+Plugin 'pangloss/vim-javascript'
+Plugin 'mxw/vim-jsx'
+Plugin 'oplatek/Conque-Shell'
+
+call vundle#end()
+filetype plugin indent on
+
+""""""""""""""""""""""""""""""Console
+let g:ConsoleStatus = 0 " 0 - close 1 - open 2 - hide
+function ToggleConsole(direction)
+    if g:ConsoleStatus == 0
+        let g:ConsoleStatus = 1
+        if a:direction == "h"
+            :ConqueTermSplit bash
+            resize 15
+        else
+            :ConqueTermVSplit bash
+            resize 40
+        endif
+        :file console
+    elseif g:ConsoleStatus == 1
+        let g:ConsoleStatus = 2
+        :hide
+    elseif g:ConsoleStatus == 2
+        let g:ConsoleStatus = 1
+        set splitright
+        set splitbelow
+        if a:direction == "h"
+            sbuffer console
+            resize 15
+        else
+            vertical sbuffer console
+            resize 40
+        endif
+        set nosplitright
+        set nosplitbelow
+    endif
+endfunction
+""""""""""""""""""""""""""""""
+
+syntax on
+set number
+set autoindent
+set smartindent
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set expandtab
+set hlsearch
+" colorscheme evening
+highlight Normal ctermbg=None
+highlight Visual cterm=reverse
+" highlight NonText ctermfg=NONE
+
+map <C-h> <C-w>h
+map <C-j> <C-w>j
+map <C-k> <C-w>k
+map <C-l> <C-w>l
+map <F7> <Esc><C-w>-
+map <F8> <Esc><C-w>+
+map <F9> <Esc><C-w><
+map <F10> <Esc><C-w>>
+map <F1> <Esc>:call ToggleConsole("h")<CR>
+map <F2> <Esc>:call ToggleConsole("v")<CR>
+imap <F7> <Esc><C-w>-
+imap <F8> <Esc><C-w>+
+imap <F9> <Esc><C-w><
+imap <F10> <Esc><C-w>>
+imap <F1> <Esc>:call ToggleConsole("h")<CR>
+imap <F2> <Esc>:call ToggleConsole("v")<CR>
+
+map <C-m> :NERDTreeFind<CR>
+map <C-n> :NERDTreeToggle<CR>
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+let g:ctrlp_custom_ignore = '\v[\/](node_modules|target|dist)|(\.(swp|ico|git|svn))$'
+let NERDTreeIgnore = ['\.pyc$', '\.swp$']
+let g:NERDTreeShowHidden = 1
+
