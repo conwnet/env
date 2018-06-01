@@ -1,0 +1,30 @@
+! Put user rules line by line in this file.
+! See https://adblockplus.org/en/filter-cheatsheet
+||ant.design
+||live.com
+||xda-developers.com
+||mozilla.net
+||sstatic.net
+||quantcount.com
+||android.com
+||github.com
+||githubusercontent.com
+||vimcasts.org
+||cloudfront.net
+||apachefriends.org
+||bitnami.com
+||twitter.com
+||kotlinlang.org
+||jetbrains.com
+||gitbooks.io
+||vuejs.org
+||yesno.wtf
+||mozilla.org
+||xda-cdn.com
+||backlog.com
+||gitbook.com
+||codepen.io
+||amazonaws.com
+||bundle.run
+||react-china.org
+||reacttraining.com
