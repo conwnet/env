@@ -62,8 +62,26 @@ else
   PROMPT_COMMAND="set_bash_prompt"
 fi
 
-# ---------- Setup Python Venv ----------
 
+# ---------- Search by prefix ----------
+
+if [[ $- == *i* ]]; then
+  bind '"\e[A": history-search-backward'
+  bind '"\e[B": history-search-forward'
+  bind '"\eOA": history-search-backward'
+  bind '"\eOB": history-search-forward'
+fi
+
+# ---------- Common Settings ----------
+
+export HISTTIMEFORMAT='%F %T  '
+
+alias gs="git status"
+alias gl="git log"
+
+# ---------- Other Settings ----------
+
+# Setup Python Venv
 if [ -f ".venv/bin/activate" ]; then
     source .venv/bin/activate;
 fi
