@@ -1,0 +1,63 @@
+# ---------- Pretty Bash Prompt with Git ----------
+
+if [[ -t 1 ]]; then
+  COLOR_RESET="\[\e[0m\]"
+  COLOR_USER="\[\e[38;5;81m\]"
+  COLOR_HOST="\[\e[38;5;110m\]"
+  COLOR_PATH="\[\e[38;5;214m\]"
+  COLOR_OK="\[\e[38;5;42m\]"
+  COLOR_ERR="\[\e[38;5;196m\]"
+  COLOR_SYMBOL="\[\e[38;5;244m\]"
+
+  GIT_COLOR=$'\001\e[38;5;113m\002'
+  GIT_DIRTY_COLOR=$'\001\e[38;5;203m\002'
+  GIT_RESET=$'\001\e[0m\002'
+else
+  COLOR_RESET=""
+  COLOR_USER=""
+  COLOR_HOST=""
+  COLOR_PATH=""
+  COLOR_OK=""
+  COLOR_ERR=""
+  COLOR_SYMBOL=""
+
+  GIT_COLOR=""
+  GIT_DIRTY_COLOR=""
+  GIT_RESET=""
+fi
+
+parse_git_prompt() {
+  git rev-parse --is-inside-work-tree &>/dev/null || return
+
+  local branch
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null \
+    || git rev-parse --short HEAD 2>/dev/null)
+
+  local dirty=""
+  if ! git diff --quiet --ignore-submodules -- 2>/dev/null \
+     || ! git diff --cached --quiet --ignore-submodules -- 2>/dev/null; then
+    dirty="${GIT_DIRTY_COLOR}*${GIT_COLOR}"
+  fi
+
+  printf " %sgit:(%s%s)%s" "$GIT_COLOR" "$branch" "$dirty" "$GIT_RESET"
+}
+
+set_bash_prompt() {
+  local last_status=$?
+
+  local status_icon
+  if [[ $last_status -eq 0 ]]; then
+    status_icon="${COLOR_OK}➜${COLOR_RESET}"
+  else
+    status_icon="${COLOR_ERR}✗ ${last_status}${COLOR_RESET}"
+  fi
+
+  # PS1="${status_icon} ${COLOR_USER}\u${COLOR_SYMBOL}@${COLOR_HOST}\h ${COLOR_PATH}\w${COLOR_RESET}\$(parse_git_prompt)\n${COLOR_SYMBOL}\\$ ${COLOR_RESET}"
+  PS1="${status_icon} ${COLOR_PATH}\W${COLOR_RESET}\$(parse_git_prompt) ${COLOR_SYMBOL}\\$ ${COLOR_RESET}"
+}
+
+if [[ -n "$PROMPT_COMMAND" ]]; then
+  PROMPT_COMMAND="set_bash_prompt; $PROMPT_COMMAND"
+else
+  PROMPT_COMMAND="set_bash_prompt"
+fi
