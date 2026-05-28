@@ -70,11 +70,13 @@ if [[ $- == *i* ]]; then
   bind '"\e[B": history-search-forward'
   bind '"\eOA": history-search-backward'
   bind '"\eOB": history-search-forward'
+  bind 'set bind-tty-special-chars off'
+  bind '"\C-w": backward-kill-word'
 fi
 
 # ---------- Common Settings ----------
 
-export HISTTIMEFORMAT='%F %T  '
+HISTTIMEFORMAT='%F %T  '
 
 alias gs="git status"
 alias gl="git log"
