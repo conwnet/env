@@ -76,6 +76,8 @@ fi
 
 # ---------- Common Settings ----------
 
+HISTSIZE=50000
+HISTFILESIZE=100000
 HISTTIMEFORMAT='%F %T  '
 
 alias gs="git status"
