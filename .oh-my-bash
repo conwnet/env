@@ -1,3 +1,4 @@
+# curl -sL -o ~/.oh-my-bash https://raw.githubusercontent.com/conwnet/env/refs/heads/master/.oh-my-bash && echo 'source "$HOME/.oh-my-bash"' >> ~/.bashrc
 # ---------- Pretty Bash Prompt with Git ----------
 
 if [[ -t 1 ]]; then
