@@ -1,95 +1,111 @@
 # curl -sL -o ~/.oh-my-bash https://raw.githubusercontent.com/conwnet/env/refs/heads/master/.oh-my-bash && echo 'source "$HOME/.oh-my-bash"' >> ~/.bashrc
-# ---------- Pretty Bash Prompt with Git ----------
 
-if [[ -t 1 ]]; then
-  COLOR_RESET="\[\e[0m\]"
-  COLOR_USER="\[\e[38;5;81m\]"
-  COLOR_HOST="\[\e[38;5;110m\]"
-  COLOR_PATH="\[\e[38;5;214m\]"
-  COLOR_OK="\[\e[38;5;42m\]"
-  COLOR_ERR="\[\e[38;5;196m\]"
-  COLOR_SYMBOL="\[\e[38;5;244m\]"
-
-  GIT_COLOR=$'\001\e[38;5;113m\002'
-  GIT_DIRTY_COLOR=$'\001\e[38;5;203m\002'
-  GIT_RESET=$'\001\e[0m\002'
-else
-  COLOR_RESET=""
-  COLOR_USER=""
-  COLOR_HOST=""
-  COLOR_PATH=""
-  COLOR_OK=""
-  COLOR_ERR=""
-  COLOR_SYMBOL=""
-
-  GIT_COLOR=""
-  GIT_DIRTY_COLOR=""
-  GIT_RESET=""
-fi
-
-parse_git_prompt() {
-  git rev-parse --is-inside-work-tree &>/dev/null || return
-
-  local branch
-  branch=$(git symbolic-ref --short HEAD 2>/dev/null \
-    || git rev-parse --short HEAD 2>/dev/null)
-
-  local dirty=""
-  if ! git diff --quiet --ignore-submodules -- 2>/dev/null \
-     || ! git diff --cached --quiet --ignore-submodules -- 2>/dev/null; then
-    dirty="${GIT_DIRTY_COLOR}*${GIT_COLOR}"
-  fi
-
-  printf " %sgit:(%s%s)%s" "$GIT_COLOR" "$branch" "$dirty" "$GIT_RESET"
-}
-
-set_bash_prompt() {
-  local last_status=$?
-
-  local status_icon
-  if [[ $last_status -eq 0 ]]; then
-    status_icon="${COLOR_OK}➜${COLOR_RESET}"
-  else
-    status_icon="${COLOR_ERR}✗ ${last_status}${COLOR_RESET}"
-  fi
-
-  # PS1="${status_icon} ${COLOR_USER}\u${COLOR_SYMBOL}@${COLOR_HOST}\h ${COLOR_PATH}\w${COLOR_RESET}\$(parse_git_prompt)\n${COLOR_SYMBOL}\\$ ${COLOR_RESET}"
-  PS1="${status_icon} ${COLOR_PATH}\W${COLOR_RESET}\$(parse_git_prompt) ${COLOR_SYMBOL}\\$ ${COLOR_RESET}"
-}
-
-if [[ -n "$PROMPT_COMMAND" ]]; then
-  PROMPT_COMMAND="set_bash_prompt; $PROMPT_COMMAND"
-else
-  PROMPT_COMMAND="set_bash_prompt"
-fi
+# 仅用于交互式 Bash
+[[ $- == *i* ]] || return
 
 
-# ---------- Search by prefix ----------
-
-if [[ $- == *i* ]]; then
-  bind '"\e[A": history-search-backward'
-  bind '"\e[B": history-search-forward'
-  bind '"\eOA": history-search-backward'
-  bind '"\eOB": history-search-forward'
-  bind 'set bind-tty-special-chars off'
-  bind '"\C-w": backward-kill-word'
-fi
-
-# ---------- Common Settings ----------
+# ---------- History ----------
 
 HISTSIZE=50000
 HISTFILESIZE=100000
 HISTTIMEFORMAT='%F %T  '
 
 shopt -s histappend
-PROMPT_COMMAND="history -a; history -n${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
 
-alias gs="git status"
-alias gl="git log"
+bind '"\e[A": history-search-backward'
+bind '"\e[B": history-search-forward'
+bind '"\eOA": history-search-backward'
+bind '"\eOB": history-search-forward'
 
-# ---------- Other Settings ----------
+bind 'set bind-tty-special-chars off'
+bind '"\C-w": backward-kill-word'
+
+
+# ---------- Colors ----------
+
+if [[ -t 1 ]]; then
+  COLOR_RESET='\[\e[0m\]'
+  COLOR_PATH='\[\e[38;5;214m\]'
+  COLOR_OK='\[\e[38;5;42m\]'
+  COLOR_ERR='\[\e[38;5;196m\]'
+  COLOR_SYMBOL='\[\e[38;5;244m\]'
+
+  GIT_COLOR=$'\001\e[38;5;113m\002'
+  GIT_DIRTY_COLOR=$'\001\e[38;5;203m\002'
+  GIT_RESET=$'\001\e[0m\002'
+else
+  COLOR_RESET=''
+  COLOR_PATH=''
+  COLOR_OK=''
+  COLOR_ERR=''
+  COLOR_SYMBOL=''
+
+  GIT_COLOR=''
+  GIT_DIRTY_COLOR=''
+  GIT_RESET=''
+fi
+
+
+# ---------- Prompt ----------
+
+__custom_git_prompt() {
+  local branch
+  local dirty=''
+
+  # 非 Git 目录立即返回
+  command git rev-parse --git-dir &>/dev/null || return
+
+  branch="$(
+    command git symbolic-ref --quiet --short HEAD 2>/dev/null ||
+    command git rev-parse --short HEAD 2>/dev/null
+  )" || return
+
+  if [[ -n "$(
+    command git status \
+      --porcelain=v1 \
+      --untracked-files=no \
+      --ignore-submodules=all \
+      2>/dev/null
+  )" ]]; then
+    dirty="${GIT_DIRTY_COLOR}*${GIT_COLOR}"
+  fi
+
+  printf ' %sgit:(%s%s)%s' "$GIT_COLOR" "$branch" "$dirty" "$GIT_RESET"
+}
+
+__custom_set_bash_prompt() {
+  local last_status=$1
+  local status_icon
+
+  if [[ $last_status -eq 0 ]]; then
+    status_icon="${COLOR_OK}➜${COLOR_RESET}"
+  else
+    status_icon="${COLOR_ERR}✗ ${last_status}${COLOR_RESET}"
+  fi
+
+  PS1="${status_icon} ${COLOR_PATH}\W${COLOR_RESET}\$(__custom_git_prompt) ${COLOR_SYMBOL}\\$ ${COLOR_RESET}"
+}
+
+__custom_prompt_command() {
+  local last_status=$?
+
+  __custom_set_bash_prompt "$last_status"
+
+  builtin history -a
+}
+
+PROMPT_COMMAND=__custom_prompt_command
+
+
+# ---------- Common Settings ----------
+
+alias gs='git status'
+alias gl='git log'
+
+
+# ---------- Python Virtualenv ----------
 
 # Setup Python Venv
-if [ -f ".venv/bin/activate" ]; then
-    source .venv/bin/activate;
+if [[ -z ${VIRTUAL_ENV-} && -f "$PWD/.venv/bin/activate" ]]; then
+  source "$PWD/.venv/bin/activate"
 fi
