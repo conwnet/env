@@ -89,9 +89,9 @@ __custom_set_bash_prompt() {
 __custom_prompt_command() {
   local last_status=$?
 
-  __custom_set_bash_prompt "$last_status"
-
   builtin history -a
+
+  __custom_set_bash_prompt "$last_status"
 }
 
 PROMPT_COMMAND=__custom_prompt_command
