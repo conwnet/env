@@ -81,6 +81,9 @@ HISTSIZE=50000
 HISTFILESIZE=100000
 HISTTIMEFORMAT='%F %T  '
 
+shopt -s histappend
+PROMPT_COMMAND="history -a; history -n${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+
 alias gs="git status"
 alias gl="git log"
 
