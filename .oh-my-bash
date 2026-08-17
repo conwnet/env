@@ -1,6 +1,6 @@
 # curl -sL -o ~/.oh-my-bash https://raw.githubusercontent.com/conwnet/env/refs/heads/master/.oh-my-bash && echo 'source "$HOME/.oh-my-bash"' >> ~/.bashrc
 
-# 仅用于交互式 Bash
+# Only for interactive Bash
 [[ $- == *i* ]] || return
 
 
@@ -52,7 +52,7 @@ __custom_git_prompt() {
   local branch
   local dirty=''
 
-  # 非 Git 目录立即返回
+  # Return immediately if not in a Git directory
   command git rev-parse --git-dir &>/dev/null || return
 
   branch="$(
@@ -95,17 +95,3 @@ __custom_prompt_command() {
 }
 
 PROMPT_COMMAND=__custom_prompt_command
-
-
-# ---------- Common Settings ----------
-
-alias gs='git status'
-alias gl='git log'
-
-
-# ---------- Python Virtualenv ----------
-
-# Setup Python Venv
-if [[ -z ${VIRTUAL_ENV-} && -f "$PWD/.venv/bin/activate" ]]; then
-  source "$PWD/.venv/bin/activate"
-fi
